@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trainingsschema Manager</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #e0f2fe 0%, #ddd6fe 100%);
+            min-height: 100vh;
+            padding: 24px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 24px;
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-title h1 {
+            font-size: 28px;
+            color: #1f2937;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #4f46e5;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #4338ca;
+        }
+
+        .btn-success {
+            background: #16a34a;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #15803d;
+        }
+
+        .btn-danger {
+            background: #dc2626;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #b91c1c;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .week-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .week-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .week-title-edit {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .week-title-input {
+            font-size: 24px;
+            font-weight: bold;
+            color: #1f2937;
+            border: 2px solid #d1d5db;
+            border-radius: 8px;
+            padding: 8px 12px;
+            max-width: 300px;
+        }
+
+        .week-title-input:focus {
+            outline: none;
+            border-color: #4f46e5;
+        }
+
+        .week-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .week-overview {
+            background: #f9fafb;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 24px;
+        }
+
+        .week-overview h3 {
+            font-size: 18px;
+            color: #1f2937;
+            margin-bottom: 16px;
+        }
+
+        .overview-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+        }
+
+        .overview-day {
+            background: white;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            padding: 12px 8px;
+            text-align: center;
+        }
+
+        .overview-day-name {
+            font-weight: 600;
+            font-size: 13px;
+            color: #374151;
+            margin-bottom: 4px;
+        }
+
+        .overview-day-date {
+            font-size: 12px;
+            color: #6b7280;
+            margin-bottom: 8px;
+        }
+
+        .overview-day-info {
+            font-size: 11px;
+            color: #4b5563;
+            line-height: 1.4;
+        }
+
+        .training-card {
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            overflow: hidden;
+        }
+
+        .training-header {
+            background: #000;
+            color: white;
+            padding: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .training-header:hover {
+            background: #1f2937;
+        }
+
+        .training-header-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .training-number {
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .training-content {
+            padding: 20px;
+            background: white;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 6px;
+        }
+
+        .form-input,
+        .form-textarea,
+        .form-select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        .form-input:focus,
+        .form-textarea:focus,
+        .form-select:focus {
+            outline: none;
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .form-grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        .form-grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+
+        .section-box {
+            background: #f9fafb;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .section-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .section-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .intentie-row,
+        .item-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .intentie-type,
+        .item-type {
+            padding: 8px 12px;
+            border: 1px solid;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            min-width: 70px;
+        }
+
+        .type-ep {
+            background: #dcfce7;
+            border-color: #86efac;
+            color: #166534;
+        }
+
+        .type-tp {
+            background: #fee2e2;
+            border-color: #fca5a5;
+            color: #991b1b;
+        }
+
+        .type-014 {
+            background: #f3f4f6;
+            border-color: #d1d5db;
+            color: #1f2937;
+        }
+
+        .type-017 {
+            background: #fed7aa;
+            border-color: #fdba74;
+            color: #9a3412;
+        }
+
+        .green-section {
+            background: #dcfce7;
+        }
+
+        .green-input {
+            background: #f0fdf4;
+            border-color: #86efac;
+        }
+
+        .icon {
+            width: 20px;
+            height: 20px;
+            stroke: currentColor;
+            stroke-width: 2;
+            fill: none;
+        }
+
+        .icon-delete {
+            color: #dc2626;
+            cursor: pointer;
+        }
+
+        .icon-delete:hover {
+            color: #991b1b;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 12px;
+        }
+
+        .modal-text {
+            color: #6b7280;
+            margin-bottom: 24px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .modal-actions .btn {
+            flex: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-title">
+                <svg class="icon" style="width: 32px; height: 32px; color: #4f46e5;" viewBox="0 0 24 24">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+                <h1>Trainingsschema Manager</h1>
+            </div>
+            <button class="btn btn-primary" onclick="addWeek()">
+                <svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                Nieuwe Week
+            </button>
+        </div>
+
+        <div id="weeks-container"></div>
+    </div>
+
+    <script>
+        let weeks = [
+            {
+                id: 1,
+                name: 'Week 16',
+                trainings: [
+                    {
+                        id: 1,
+                        datum: 'zondag 30 nov',
+                        trainingNummer: '13',
+                        soortTraining: 'Wedstrijd Training',
+                        activatie: 'n.v.t.',
+                        evv: 'n.v.t.',
+                        teamfunctie: 'Aanvallen',
+                        teamintenties: [
+                            { type: 'EP', text: 'Optimale Veldbezetting (bezzting voor de goal & Restverdediging)' },
+                            { type: 'TP', text: 'Compact spelen (afstanden klein men en houden in diepte en breedte)' }
+                        ],
+                        individueleIntenties: [
+                            { type: 'EP', text: 'BBM - Snel richting goal of naar de ruimte om vooruit te komen' },
+                            { type: 'EP', text: 'BEA - Veldbezetting goed houden' },
+                            { type: 'TP', text: 'BBM - Tegstander voor je houden en afpakken. (niet uigespeeld worden, ongedwongen pass naar de goal voorkomen, moment kiezen om af te pakken)' },
+                            { type: 'TP', text: 'BEA - Tegenstander dekken en medespeler helpen' }
+                        ],
+                        oefenvormen: [
+                            '1. Rondo 5:2 + 4:2 ;',
+                            '2. Hooghouden',
+                            '3. Positiespel 6:6 + 1',
+                            '4. Eindspel : Keepersoorlog'
+                        ],
+                        trainingsvorm1: { type: 'Stap', content: '' },
+                        trainingsvorm2: { type: 'Stap', content: '' },
+                        formaties: '',
+                        spelregels: 'Speciale Regels *\n- Normale regels',
+                        mentaalGedrag: [
+                            { type: '014', text: 'Perfroming - Afspraken en begrip bewakenn /' },
+                            { type: '017', text: 'Norming - Afspraken en begrip bewaken' }
+                        ],
+                        notitie: '014 : wedstrijd tegen panenka'
+                    }
+                ]
+            }
+        ];
+
+        let expandedTrainings = {};
+
+        function render() {
+            const container = document.getElementById('weeks-container');
+            container.innerHTML = weeks.map(week => renderWeek(week)).join('');
+        }
+
+        function renderWeek(week) {
+            return `
+                <div class="week-card">
+                    <div class="week-header">
+                        <div class="week-title-edit">
+                            <input 
+                                type="text" 
+                                class="week-title-input" 
+                                value="${week.name}"
+                                onchange="updateWeekName(${week.id}, this.value)"
+                                placeholder="Week naam..."
+                            >
+                        </div>
+                        <div class="week-actions">
+                            <button class="btn btn-success" onclick="addTraining(${week.id})">
+                                <svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                Nieuwe Training
+                            </button>
+                            <button class="btn btn-danger" onclick="confirmDeleteWeek(${week.id})">
+                                <svg class="icon" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                Verwijder Week
+                            </button>
+                        </div>
+                    </div>
+
+                    ${renderWeekOverview(week)}
+
+                    ${week.trainings.map(training => renderTraining(week.id, training)).join('')}
+                </div>
+            `;
+        }
+
+        function renderWeekOverview(week) {
+            const daysOfWeek = ['Maandag', 'Dinsdag', 'Woensdag', 'Donderdag', 'Vrijdag', 'Zaterdag', 'Zondag'];
+            const trainingsByDay = {};
+            
+            week.trainings.forEach(training => {
+                const day = training.datum.toLowerCase();
+                daysOfWeek.forEach(dayName => {
+                    if (day.includes(dayName.toLowerCase())) {
+                        trainingsByDay[dayName] = training;
+                    }
+                });
+            });
+
+            return `
+                <div class="week-overview">
+                    <h3>Week Overzicht</h3>
+                    <div class="overview-grid">
+                        ${daysOfWeek.map(day => {
+                            const training = trainingsByDay[day];
+                            return `
+                                <div class="overview-day">
+                                    <div class="overview-day-name">${day}</div>
+                                    <div class="overview-day-date">${training ? training.datum.split(' ').slice(1).join(' ') : '-'}</div>
+                                    <div class="overview-day-info">
+                                        ${training ? `
+                                            <div><strong>#${training.trainingNummer}</strong></div>
+                                            <div>${training.soortTraining}</div>
+                                        ` : '<div>Geen training</div>'}
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderTraining(weekId, training) {
+            const key = `${weekId}-${training.id}`;
+            const isExpanded = expandedTrainings[key];
+
+            return `
+                <div class="training-card">
+                    <div class="training-header" onclick="toggleTraining(${weekId}, ${training.id})">
+                        <div class="training-header-info">
+                            <span class="training-number">Training ${training.trainingNummer || '#'}</span>
+                            <span>${training.datum}</span>
+                            <span style="font-size: 13px;">${training.soortTraining}</span>
+                        </div>
+                        <svg class="icon" viewBox="0 0 24 24" style="transform: rotate(${isExpanded ? '180' : '0'}deg); transition: transform 0.2s;">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </div>
+
+                    <div class="training-content ${isExpanded ? '' : 'hidden'}">
+                        ${renderTrainingContent(weekId, training)}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderTrainingContent(weekId, training) {
+            return `
+                <div class="form-grid-2">
+                    <div class="form-group">
+                        <label class="form-label">Datum</label>
+                        <input type="text" class="form-input" value="${training.datum}" 
+                            onchange="updateTraining(${weekId}, ${training.id}, 'datum', this.value)" 
+                            placeholder="zondag 30 nov">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Training nummer</label>
+                        <input type="text" class="form-input" value="${training.trainingNummer}" 
+                            onchange="updateTraining(${weekId}, ${training.id}, 'trainingNummer', this.value)" 
+                            placeholder="13">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Soort training</label>
+                    <input type="text" class="form-input" value="${training.soortTraining}" 
+                        onchange="updateTraining(${weekId}, ${training.id}, 'soortTraining', this.value)" 
+                        placeholder="Wedstrijd Training">
+                </div>
+
+                <div class="form-grid-3">
+                    <div class="form-group">
+                        <label class="form-label">Activatie</label>
+                        <input type="text" class="form-input" value="${training.activatie}" 
+                            onchange="updateTraining(${weekId}, ${training.id}, 'activatie', this.value)" 
+                            placeholder="n.v.t.">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">EVV</label>
+                        <input type="text" class="form-input" value="${training.evv}" 
+                            onchange="updateTraining(${weekId}, ${training.id}, 'evv', this.value)" 
+                            placeholder="n.v.t.">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Teamfunctie</label>
+                        <input type="text" class="form-input" value="${training.teamfunctie}" 
+                            onchange="updateTraining(${weekId}, ${training.id}, 'teamfunctie', this.value)" 
+                            placeholder="Aanvallen">
+                    </div>
+                </div>
+
+                <div class="section-box">
+                    <div class="section-header">
+                        <h3 class="section-title">Teamintenties die centraal staan</h3>
+                        <div class="section-actions">
+                            <button class="btn btn-small" style="background: #16a34a; color: white;" 
+                                onclick="addIntentie(${weekId}, ${training.id}, 'teamintenties', 'EP')">+ EP</button>
+                            <button class="btn btn-small" style="background: #dc2626; color: white;" 
+                                onclick="addIntentie(${weekId}, ${training.id}, 'teamintenties', 'TP')">+ TP</button>
+                        </div>
+                    </div>
+                    ${training.teamintenties.map((intentie, idx) => `
+                        <div class="intentie-row">
+                            <select class="intentie-type type-${intentie.type.toLowerCase()}" 
+                                onchange="updateIntentieType(${weekId}, ${training.id}, 'teamintenties', ${idx}, this.value)">
+                                <option value="EP" ${intentie.type === 'EP' ? 'selected' : ''}>EP</option>
+                                <option value="TP" ${intentie.type === 'TP' ? 'selected' : ''}>TP</option>
+                            </select>
+                            <input type="text" class="form-input" style="flex: 1; background: ${intentie.type === 'EP' ? '#f0fdf4' : '#fef2f2'};" 
+                                value="${intentie.text}"
+                                onchange="updateIntentieText(${weekId}, ${training.id}, 'teamintenties', ${idx}, this.value)"
+                                placeholder="Beschrijving...">
+                            <svg class="icon icon-delete" viewBox="0 0 24 24" onclick="deleteIntentie(${weekId}, ${training.id}, 'teamintenties', ${idx})">
+                                <polyline points="3 6 5 6 21 6"></polyline>
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                            </svg>
+                        </div>
+                    `).join('')}
+                </div>
+
+                <div class="section-box">
+                    <div class="section-header">
+                        <h3 class="section-title">Individuele intenties die centraal staan</h3>
+                        <div class="section-actions">
+                            <button class="btn btn-small" style="background: #16a34a; color: white;" 
+                                onclick="addIntentie(${weekId}, ${training.id}, 'individueleIntenties', 'EP')">+ EP</button>
+                            <button class="btn btn-small" style="background: #dc2626; color: white;" 
+                                onclick="addIntentie(${weekId}, ${training.id}, 'individueleIntenties', 'TP')">+ TP</button>
+                        </div>
+                    </div>
+                    ${training.individueleIntenties.map((intentie, idx) => `
+                        <div class="intentie-row">
+                            <select class="intentie-type type-${intentie.type.toLowerCase()}" 
+                                onchange="updateIntentieType(${weekId}, ${training.id}, 'individueleIntenties', ${idx}, this.value)">
+                                <option value="EP" ${intentie.type === 'EP' ? 'selected' : ''}>EP</option>
+                                <option value="TP" ${intentie.type === 'TP' ? 'selected' : ''}>TP</option>
+                            </select>
+                            <input type="text" class="form-input" style="flex: 1; background: ${intentie.type === 'EP' ? '#f0fdf4' : '#fef2f2'};" 
+                                value="${intentie.text}"
+                                onchange="updateIntentieText(${weekId}, ${training.id}, 'individueleIntenties', ${idx}, this.value)"
+                                placeholder="Beschrijving...">
+                            <svg class="icon icon-delete" viewBox="0 0 24 24" onclick="deleteIntentie(${weekId}, ${training.id}, 'individueleIntenties', ${idx})">
+                                <polyline points="3 6 5 6 21 6"></polyline>
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                            </svg>
+                        </div>
+                    `).join('')}
+                </div>
+
+                <div class="section-box">
+                    <div class="section-header">
+                        <h3 class="section-title">Oefenvormen</h3>
+                        <button class="btn btn-small btn-primary" onclick="addOefenvorm(${weekId}, ${training.id})">+ Oefenvorm</button>
+                    </div>
+                    ${training.oefenvormen.map((vorm, idx) => `
+                        <div class="item-row">
+                            <input type="text" class="form-input" style="flex: 1;" 
+                                value="${vorm}"
+                                onchange="updateOefenvorm(${weekId}, ${training.id}, ${idx}, this.value)"
+                                placeholder="${idx + 1}. Oefenvorm...">
+                            <svg class="icon icon-delete" viewBox="0 0 24 24" onclick="deleteOefenvorm(${weekId}, ${training.id}, ${idx})">
+                                <polyline points="3 6 5 6 21 6"></polyline>
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                            </svg>
+                        </div>
+                    `).join('')}
+                </div>
+
+                <div class="form-grid-2">
+                    <div class="section-box green-section">
+                        <h3 class="section-title">Trainingsvorm 1</h3>
+                        <select class="form-select" style="margin-bottom: 8px;" 
+                            onchange="updateTrainingsvorm(${weekId}, ${training.id}, 'trainingsvorm1', 'type', this.value)">
+                            <option value="Stap" ${training.trainingsvorm1.type === 'Stap' ? 'selected' : ''}>Stap</option>
+                            <option value="Anders" ${training.trainingsvorm1.type === 'Anders' ? 'selected' : ''}>Anders</option>
+                        </select>
+                        <textarea class="form-textarea" rows="3"
+                            onchange="updateTrainingsvorm(${weekId}, ${training.id}, 'trainingsvorm1', 'content', this.value)"
+                            placeholder="Beschrijving...">${training.trainingsvorm1.content}</textarea>
+                    </div>
+                    <div class="section-box green-section">
+                        <h3 class="section-title">Trainingsvorm 2</h3>
+                        <select class="form-select" style="margin-bottom: 8px;" 
+                            onchange="updateTrainingsvorm(${weekId}, ${training.id}, 'trainingsvorm2', 'type', this.value)">
+                            <option value="Stap" ${training.trainingsvorm2.type === 'Stap' ? 'selected' : ''}>Stap</option>
+                            <option value="Anders" ${training.trainingsvorm2.type === 'Anders' ? 'selected' : ''}>Anders</option>
+                        </select>
+                        <textarea class="form-textarea" rows="3"
+                            onchange="updateTrainingsvorm(${weekId}, ${training.id}, 'trainingsvorm2', 'content', this.value)"
+                            placeholder="Beschrijving...">${training.trainingsvorm2.content}</textarea>
+                    </div>
+                </div>
+
+                <div class="form-grid-2">
+                    <div class="form-group">
+                        <label class="form-label">Formaties EP - TP</label>
+                        <textarea class="form-textarea" rows="3"
+                            onchange="updateTraining(${weekId}, ${training.id}, 'formaties', this.value)"
+                            placeholder="Formaties...">${training.formaties}</textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Spelregels</label>
+                        <textarea class="form-textarea" rows="3"
+                            onchange="updateTraining(${weekId}, ${training.id}, 'spelregels', this.value)"
+                            placeholder="Speciale Regels *...">${training.spelregels}</textarea>
+                    </div>
+                </div>
+
+                <div class="section-box">
+                    <div class="section-header">
+                        <h3 class="section-title">Mentaal/gedrag</h3>
+                        <button class="btn btn-small" style="background: #f97316; color: white;" onclick="addMentaalGedrag(${weekId}, ${training.id})">+ Mentaal/gedrag</button>
+                    </div>
+                    ${training.mentaalGedrag.map((item, idx) => `
+                        <div class="item-row">
+                            <select class="item-type type-${item.type}" 
+                                onchange="updateMentaalGedragType(${weekId}, ${training.id}, ${idx}, this.value)">
+                                <option value="014" ${item.type === '014' ? 'selected' : ''}>014</option>
+                                <option value="017" ${item.type === '017' ? 'selected' : ''}>017</option>
+                            </select>
+                            <input type="text" class="form-input" style="flex: 1; background: ${item.type === '014' ? '#f9fafb' : '#fed7aa'};" 
+                                value="${item.text}"
+                                onchange="updateMentaalGedragText(${weekId}, ${training.id}, ${idx}, this.value)"
+                                placeholder="Beschrijving...">
+                            <svg class="icon icon-delete" viewBox="0 0 24 24" onclick="deleteMentaalGedrag(${weekId}, ${training.id}, ${idx})">
+                                <polyline points="3 6 5 6 21 6"></polyline>
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                            </svg>
+                        </div>
+                    `).join('')}
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Notitie</label>
+                    <textarea class="form-textarea green-input" rows="2"
+                        onchange="updateTraining(${weekId}, ${training.id}, 'notitie', this.value)"
+                        placeholder="Notities...">${training.notitie}</textarea>
+                </div>
+            `;
+        }
+
+        function addWeek() {
+            const newWeek = {
+                id: weeks.length > 0 ? Math.max(...weeks.map(w => w.id)) + 1 : 1,
+                name: `Week ${weeks.length + 1}`,
+                trainings: []
+            };
+            weeks.push(newWeek);
+            render();
+        }
+
+        function updateWeekName(weekId, newName) {
+            const week = weeks.find(w => w.id === weekId);
+            if (week) {
+                week.name = newName;
+                render();
+            }
+        }
+
+        function confirmDeleteWeek(weekId) {
+            if (confirm('Weet je zeker dat je deze week wilt verwijderen?')) {
+                weeks = weeks.filter(w => w.id !== weekId);
+                render();
+            }
+        }
+
+        function addTraining(weekId) {
+            const week = weeks.find(w => w.id === weekId);
+            if (week) {
+                const newTraining = {
+                    id: week.trainings.length > 0 ? Math.max(...week.trainings.map(t => t.id)) + 1 : 1,
+                    datum: '',
+                    trainingNummer: '',
+                    soortTraining: '',
+                    activatie: '',
+                    evv: '',
+                    teamfunctie: '',
+                    teamintenties: [],
+                    individueleIntenties: [],
+                    oefenvormen: [''],
+                    trainingsvorm1: { type: 'Stap', content: '' },
+                    trainingsvorm2: { type: 'Stap', content: '' },
+                    formaties: '',
+                    spelregels: '',
+                    mentaalGedrag: [],
+                    notitie: ''
+                };
+                week.trainings.push(newTraining);
+                expandedTrainings[`${weekId}-${newTraining.id}`] = true;
+                render();
+            }
+        }
+
+        function toggleTraining(weekId, trainingId) {
+            const key = `${weekId}-${trainingId}`;
+            expandedTrainings[key] = !expandedTrainings[key];
+            render();
+        }
+
+        function updateTraining(weekId, trainingId, field, value) {
+            const week = weeks.find(w => w.id === weekId);
+            if (week) {
+                const training = week.trainings.find(t => t.id === trainingId);
+                if (training) {
+                    training[field] = value;
+                }
+            }
+        }
+
+        function addIntentie(weekId, trainingId, type, intentieType) {
+            const week = weeks.find(w => w.id === weekId);
+            if (week) {
+                const training = week.trainings.find(t => t.id === trainingId);
+                if (training) {
+                    training[type].push({ type: intentieType, text: '' });
+                    render();
+                }
+            }
+        }
+
+        function updateIntentieType(weekId, trainingId, type, index, value) {
+            const week = weeks.find(w => w.id === weekId);
+            if (week) {
+                const training = week.trainings.find(t => t.id === trainingId);
+                if (training && training[type][index]) {
+                    training[type][index].type = value;
+                    render();
+                }
+            }
+        }
+
+        function updateIntentieText(weekId, trainingId, type, index, value) {
+            const week = weeks.find(w => w.id === weekId);
+            if (week) {
+                const training = week.trainings.find(t => t.id === trainingId);
+                if (training && training[type][index]) {
+                    training[type][index].text = value;
+                }
+            }
+        }
+
+        function deleteIntentie(weekId, trainingId, type, index) {
+            const week = weeks.find(w => w.id === weekId);
+            if (week) {
+                const training = week.trainings.find(t => t.id === trainingId);
+                if (training) {
+                    training[type].splice(index, 1);
+                    render();
+                }
+            }
+        }
+
+        function addOefenvorm(weekId, trainingId) {
+            const week = weeks.find(w => w.id === weekId);
+            if (week) {
+                const training = week.trainings.find(t => t.id === trainingId);
+                if (training) {
+                    training.oefenvormen.push('');
+                    render();
+                }
+            }
+        }
+
+        function updateOefenvorm(weekId, trainingId, index, value) {
+            const week = weeks.find(w => w.id === weekId);
+            if (week) {
+                const training = week.trainings.find(t => t.id === trainingId);
+                if (training && training.oefenvormen[index] !== undefined) {
+                    training.oefenvormen[index] = value;
+                }
+            }
+        }
+
+        function deleteOefenvorm(weekId, trainingId, index) {
+            const week = weeks.find(w => w.id === weekId);
+            if (week) {
+                const training = week.trainings.find(t => t.id === trainingId);
+                if (training) {
+                    training.oefenvormen.splice(index, 1);
+                    render();
+                }
+            }
+        }
+
+        function updateTrainingsvorm(weekId, trainingId, field, subfield, value) {
+            const week = weeks.find(w => w.id === weekId);
+            if (week) {
+                const training = week.trainings.find(t => t.id === trainingId);
+                if (training) {
+                    training[field][subfield] = value;
+                }
+            }
+        }
+
+        function addMentaalGedrag(weekId, trainingId) {
+            const week = weeks.find(w => w.id === weekId);
+            if (week) {
+                const training = week.trainings.find(t => t.id === trainingId);
+                if (training) {
+                    training.mentaalGedrag.push({ type: '014', text: '' });
+                    render();
+                }
+            }
+        }
+
+        function updateMentaalGedragType(weekId, trainingId, index, value) {
+            const week = weeks.find(w => w.id === weekId);
+            if (week) {
+                const training = week.trainings.find(t => t.id === trainingId);
+                if (training && training.mentaalGedrag[index]) {
+                    training.mentaalGedrag[index].type = value;
+                    render();
+                }
+            }
+        }
+
+        function updateMentaalGedragText(weekId, trainingId, index, value) {
+            const week = weeks.find(w => w.id === weekId);
+            if (week) {
+                const training = week.trainings.find(t => t.id === trainingId);
+                if (training && training.mentaalGedrag[index]) {
+                    training.mentaalGedrag[index].text = value;
+                }
+            }
+        }
+
+        function deleteMentaalGedrag(weekId, trainingId, index) {
+            const week = weeks.find(w => w.id === weekId);
+            if (week) {
+                const training = week.trainings.find(t => t.id === trainingId);
+                if (training) {
+                    training.mentaalGedrag.splice(index, 1);
+                    render();
+                }
+            }
+        }
+
+        // Initial render
+        render();
+    </script>
+</body>
+</html>
